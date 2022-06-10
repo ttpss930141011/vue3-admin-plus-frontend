@@ -40,6 +40,7 @@ export default ({ command, mode }) => {
    console.log(command, mode)
   * serve serve-dev
   * */
+  console.log(command, mode)
   return {
     /*
      * "/vue3-admin-plus" nginx deploy folder

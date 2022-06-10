@@ -19,7 +19,8 @@ export const useUserStore = defineStore('user', {
     return {
       username: '',
       avatar: '',
-      roles: []
+      roles: [],
+      email: ''
     }
   },
 
@@ -39,6 +40,12 @@ export const useUserStore = defineStore('user', {
         state.avatar = avatar
       })
     },
+    M_email(email) {
+      this.$patch((state) => {
+        state.email = email
+      })
+    },
+
 
     login(data) {
       return new Promise((resolve, reject) => {
@@ -96,10 +103,12 @@ export const useUserStore = defineStore('user', {
         setEmailReq({ email: email.trim(), account: this.$state.username})
           .then((response) => {
             const { data } = response
+            const { email } = data
             if (!data) {
               return reject(new Error('Verification failed, please Login again.'))
             }
-            resolve(data)
+            this.M_email(email)
+            resolve(email)
           })
           .catch((error) => {
             console.log(error)

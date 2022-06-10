@@ -1,7 +1,7 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/store/user'
 
-export default function setUSerData(emailIsExist) {
+export default function setUserData(emailIsExist) {
   const userStore = useUserStore()
   if (!emailIsExist) {
     ElMessageBox.prompt(
@@ -17,8 +17,7 @@ export default function setUSerData(emailIsExist) {
       .then(({ value }) => {
         userStore
           .setEmail(value)
-          .then((data) => {
-            const { email } = data
+          .then((email) => {
             ElMessage({
               type: 'success',
               message: `Your email is:${email}`
@@ -39,5 +38,5 @@ export default function setUSerData(emailIsExist) {
         })
       })
   }
-  console.log('setUSerData', emailIsExist)
+  console.log('setUserData', emailIsExist)
 }

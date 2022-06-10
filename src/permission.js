@@ -5,7 +5,7 @@ import NProgress from 'nprogress'
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 import 'nprogress/nprogress.css'
 import getPageTitle from '@/utils/getPageTitle'
-import setUSerData from '@/utils/setUserData'
+import setUserData from '@/utils/setUserData'
 import { useUserStore } from '@/store/user'
 import { usePermissionStore } from '@/store/permission'
 
@@ -37,7 +37,7 @@ router.beforeEach(async (to, from, next) => {
             // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
             const data = await userStore.getInfo()
             const { roles, emailIsExist } = data
-            setUSerData(emailIsExist)
+            setUserData(emailIsExist)
             accessRoutes = await permissionStore.generateRoutes(roles)
           } else {
             accessRoutes = asyncRoutes

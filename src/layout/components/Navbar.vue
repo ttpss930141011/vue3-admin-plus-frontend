@@ -7,6 +7,9 @@
         class="hamburger-container"
         @toggleClick="toggleSideBar"
       />
+      <span class="svg-container">
+        <svg-icon class="refresh" @click="refresh" icon-class="refresh" />
+      </span>
       <breadcrumb class="breadcrumb-container" />
     </div>
     <!--nav title-->
@@ -62,6 +65,7 @@ const opened = computed(() => {
 })
 const appStore = useAppStore()
 const userStore = useUserStore()
+
 const toggleSideBar = () => {
   appStore.M_toggleSideBar()
 }
@@ -75,11 +79,17 @@ const username = userStore.username
 const router = useRouter()
 const route = useRoute()
 const loginOut = () => {
-  const userStore = useUserStore()
   userStore.logout().then(() => {
     ElMessage({ message: '退出登录成功', type: 'success' })
     console.log(route.fullPath)
     router.push(`/login?redirect=${route.fullPath}`)
+  })
+}
+// 刷新layout
+const refresh = async () => {
+  const { fullPath } = route
+  router.replace({
+    path: '/redirect' + fullPath
   })
 }
 </script>
@@ -132,5 +142,18 @@ const loginOut = () => {
 .right-menu {
   cursor: pointer;
   margin-right: 40px;
+}
+
+.refresh {
+  line-height: 52px;
+  font-size: 20px;
+  padding-top: 2px;
+  height: 100%;
+  color: rgb(133, 133, 133);
+  float: left;
+  cursor: pointer;
+  transition: background 0.3s;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0 10px;
 }
 </style>

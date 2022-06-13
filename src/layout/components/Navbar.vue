@@ -8,7 +8,7 @@
         @toggleClick="toggleSideBar"
       />
       <span class="svg-container">
-        <svg-icon class="refresh" @click="refresh" icon-class="refresh" />
+        <svg-icon class="refresh" icon-class="refresh" @click="refresh" />
       </span>
       <breadcrumb class="breadcrumb-container" />
     </div>

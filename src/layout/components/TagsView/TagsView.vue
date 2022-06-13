@@ -86,6 +86,7 @@ watch(
 onMounted(() => {
   initTags()
   addTags()
+  beforeUpload()
 })
 
 const isActive = (route) => {
@@ -133,6 +134,29 @@ const addTags = () => {
     tagsViewStore.addView($route)
   }
   return false
+}
+const beforeUpload = () => {
+  window.addEventListener('beforeunload', () => {
+    // visitedViews数据结构太复杂无法直接JSON.stringify处理，先转换需要的数据
+    const tabViews = visitedViews.value.map((item) => {
+      return {
+        fullPath: item.fullPath,
+        hash: item.hash,
+        meta: { ...item.meta },
+        name: item.name,
+        params: { ...item.params },
+        path: item.path,
+        query: { ...item.query },
+        title: item.title
+      }
+    })
+    sessionStorage.setItem('tabViews', JSON.stringify(tabViews))
+  })
+  // 页面初始化加载判断缓存中是否有数据
+  const oldViews = JSON.parse(sessionStorage.getItem('tabViews')) || []
+  if (oldViews.length > 0) {
+    tagsViewStore.visitedViews = oldViews
+  }
 }
 const refreshSelectedTag = (view) => {
   const { fullPath } = view

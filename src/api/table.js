@@ -2,7 +2,7 @@ import request from 'axios'
 
 export function getList(params) {
   return request({
-    url: '/vue3-admin-plus/table/list',
+    url: 'https://api.publicapis.org/entries',
     method: 'get',
     params
   })

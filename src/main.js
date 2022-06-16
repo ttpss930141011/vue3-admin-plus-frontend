@@ -10,6 +10,11 @@ import 'element-plus/dist/index.css'
 import settings from '@/settings'
 import zh from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en' // element-ui lang
+
+import VueGoodTablePlugin from 'vue-good-table-next';
+// import the styles
+import 'vue-good-table-next/dist/vue-good-table-next.css'
+app.use(VueGoodTablePlugin)
 let lang = { zh, en }
 app.use(ElementPlus, {
   size: localStorage.getItem('size') || settings.defaultSize,

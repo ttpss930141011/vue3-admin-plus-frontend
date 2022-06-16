@@ -277,6 +277,12 @@ export const constantRoutes = [
         component: () => import('@/views/table-with-pagination/index.vue'),
         name: 'TableWithPagination',
         meta: { title: 'Table With Pagination' }
+      },
+      {
+        path: 'table',
+        component: () => import('@/views/table/index.vue'),
+        name: 'Table',
+        meta: { title: 'Table' }
       }
     ]
   },

@@ -1,117 +1,180 @@
 <template>
-  <div class='demo-wrap'>
-    <div class='filter-container'>
-      <el-input
-        v-model='listQuery.demoName'
-        class='filter-item'
-        style='width: 200px'
-        placeholder='Input name here'
-        clearable
+  <div>
+    <el-col :span="6">
+      <span class="right:margin-1">Show</span>
+      <select v-model="currentEntries" class="select" @change="paginateEntries">
+        <option v-for="se in showEntries" :key="se" :value="se">{{ se }}</option>
+      </select>
+      <span class="left:margin-1">entries</span>
+    </el-col>
+    <el-col :span="6" :offset="18">
+      <input
+        v-model="searchInput"
+        type="search"
+        class="input px:width-25"
+        placeholder="Search here..."
+        @keyup="searchEvent"
       />
-      <el-button
-        class='filter-item'
-        type='primary'
-        @click='fetchData'
-      >
-        Search
-      </el-button>
-    </div>
-    <el-table v-loading='listLoading' :data='list' element-loading-text='Loading' border highlight-current-row>
-      <el-table-column align='center' label='No.' width='95'>
-        <template #default='scope'>
-          {{ scope.$index + 1 }}
-        </template>
-      </el-table-column>
-      <el-table-column label='Name'>
-        <template #default='scope'>
-          {{ scope.row.name }}
-        </template>
-      </el-table-column>
-      <el-table-column label='Age' width='110' align='center'>
-        <template #default='scope'>
-          <span>{{ scope.row.age }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label='Address' align='center'>
-        <template #default='scope'>
-          <span>{{ scope.row.address }}</span>
-        </template>
-      </el-table-column>
+    </el-col>
+
+    <el-table :data="tableData" style="width: 100%" height="400">
+      <el-table-column v-for="th in tableHeader" :key="th.name" :prop="th.name" :label="th.text" :fixed="true" />
     </el-table>
-    <Pagination
-      v-show='total > 0'
-      v-model:page='listQuery.current'
-      v-model:limit='listQuery.size'
-      :total='total'
-      @pagination='fetchData'
-    />
+
+    <div>
+      <el-col :span="6">Show {{ showInfo.from }} to {{ showInfo.to }} of {{ showInfo.of }} entries</el-col>
+      <el-col :span="6" :offset="18">
+        <ul class="pagination:nav">
+          <li :class="['nav-item', { disabled: currentPage === 1 }]">
+            <a href="#" class="nav-link" @click.prevent=";(currentPage = 1), paginateEntries()">First</a>
+          </li>
+          <li :class="['nav-item', { disabled: currentPage === 1 }]">
+            <a
+              href="#"
+              class="nav-link"
+              @click.prevent="currentPage < 1 ? (currentPage = 1) : (currentPage -= 1), paginateEntries()"
+            >
+              Prev
+            </a>
+          </li>
+          <li
+            v-for="pagi in showPagination"
+            :key="pagi"
+            :class="['nav-item', { ellipsis: pagi === '...', active: pagi === currentPage }]"
+          >
+            <a href="#" class="nav-link" @click.prevent="paginateEvent(pagi)">{{ pagi }}</a>
+          </li>
+          <li :class="['nav-item', { disabled: currentPage === allPages }]">
+            <a
+              href="#"
+              class="nav-link"
+              @click.prevent="currentPage > allPages ? (currentPage = allPages) : (currentPage += 1), paginateEntries()"
+            >
+              Next
+            </a>
+          </li>
+          <li :class="['nav-item', { disabled: currentPage === allPages }]">
+            <a href="#" class="nav-link" @click.prevent=";(currentPage = allPages), paginateEntries()">Last</a>
+          </li>
+        </ul>
+      </el-col>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { toRefs, reactive, onBeforeMount } from 'vue'
-import Pagination from '@/components/Pagination/index.vue'
-import { ElMessage } from 'element-plus'
-// Demo: Import your method for fetch list here
-// import { getList } from '@/api/table'
+<script>
+import { $array, $object } from 'alga-js'
 
-const state = reactive({
-  listLoading: false,
-  list: null,
-  total: 0,
-  listQuery: {
-    demoName: '',
-    // The page
-    current: 1,
-    // How many item you want to fetch at one page
-    size: 10
-  }
-})
-
-onBeforeMount(() => {
-  fetchData()
-})
-
-const fetchData = () => {
-  state.listLoading = true
-  // Demo: Define your list after fetch list and stop the loading here
-  // getList().then((response) => {
-  //   state.list = response.data?.data.items
-  //   state.listLoading = false
-  // })
-  // Delete this Timeout when you write with this file
-  ElMessage.success(`Your params: ${JSON.stringify(toRaw(state.listQuery))}`)
-  setTimeout(() => {
-    state.list = [
-      {
-        id: 1,
-        name: 'Jack',
-        age: 18,
-        address: 'Street 1'
+export default {
+  name: 'DataTable',
+  data() {
+    return {
+      columns: [
+        { name: 'API', text: 'API' },
+        { name: 'Description', text: 'Description' }
+      ],
+      entries: [],
+      showEntries: [5, 10, 15, 25, 50, 75, 100],
+      currentEntries: 10,
+      filteredEntries: [],
+      currentPage: 1,
+      allPages: 1,
+      searchInput: '',
+      searchEntries: [],
+      col: {
+        API: '',
+        Description: ''
       },
-      {
-        id: 2,
-        name: 'ponychoker',
-        age: 19,
-        address: 'Street 2'
-      },
-      {
-        id: 3,
-        name: 'Lucky',
-        age: 20,
-        address: 'Street 3'
+      sortcol: {
+        API: '',
+        Description: ''
       }
-    ]
-    state.total = 25
-    state.listLoading = false
-  }, 500)
+    }
+  },
+  computed: {
+    showInfo() {
+      return $array.show(this.getCurrentEntries(), this.currentPage, this.currentEntries)
+    },
+    showPagination() {
+      return $array.pagination(this.allPages, this.currentPage, 3)
+    },
+    tableHeader() {
+      return this.columns
+    },
+    tableData() {
+      return this.filteredEntries
+    },
+    pageSalaries() {
+      return $array.sum(this.filteredEntries, 'salary')
+    },
+    totalSalaries() {
+      return $array.sum(this.entries, 'salary')
+    }
+  },
+  created() {
+    this.getAllEmployees().then((res) => {
+      this.entries = res.entries
+      this.paginateData(this.entries)
+      //this.filteredEntries = $array.paginate(this.entries)(this.currentPage, this.currentEntries)
+      //this.allPages = $array.pages(this.entries, this.currentEntries)
+    })
+  },
+  methods: {
+    async getAllEmployees() {
+      const response = await fetch('https://api.publicapis.org/entries')
+      return response.json()
+    },
+    paginateEntries() {
+      if (this.searchInput.length >= 3) {
+        this.searchEntries = $array.search(this.entries, this.searchInput)
+        this.paginateData(this.searchEntries)
+        //this.filteredEntries = $array.paginate(this.searchEntries)(this.currentPage, this.currentEntries)
+        //this.allPages = $array.pages(this.searchEntries, this.currentEntries)
+      } else {
+        this.searchEntries = []
+        this.paginateData(this.entries)
+        this.col = {
+          API: '',
+          Description: ''
+        }
+        //this.filteredEntries = $array.paginate(this.entries)(this.currentPage, this.currentEntries)
+        //this.allPages = $array.pages(this.entries, this.currentEntries)
+      }
+    },
+    paginateEvent(page) {
+      this.currentPage = page
+      this.paginateEntries()
+    },
+    searchEvent() {
+      this.currentPage = 1
+      this.paginateEntries()
+    },
+    paginateData(arrayOfObjects) {
+      this.filteredEntries = $array.paginate(arrayOfObjects, this.currentPage, this.currentEntries)
+      this.allPages = $array.pages(arrayOfObjects, this.currentEntries)
+    },
+    getCurrentEntries() {
+      return this.searchEntries.length <= 0 ? this.entries : this.searchEntries
+    },
+    sortByColumn(column) {
+      console.log('sorting')
+      this.col = {
+        API: '',
+        Description: ''
+      }
+      let sortedEntries = this.getCurrentEntries()
+      const sortedColumn = this.sortcol[column]
+      if (sortedColumn === '') {
+        this.sortcol[column] = 'asc'
+        sortedEntries = $array.sorted(this.getCurrentEntries(), column, 'asc')
+      } else if (sortedColumn === 'asc') {
+        this.sortcol[column] = 'desc'
+        sortedEntries = $array.sorted(this.getCurrentEntries(), column, 'desc')
+      } else if (sortedColumn === 'desc') {
+        this.sortcol[column] = ''
+      }
+      this.paginateData(sortedEntries)
+    }
+  }
 }
-
-const { listLoading, list, listQuery, total } = toRefs(state)
 </script>
-
-<style lang-='scss' scoped>
-.demo-wrap {
-
-}
-</style>
